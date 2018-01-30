@@ -6,7 +6,7 @@ DECLARE
 	@DBName SYSNAME,
 	@vlfcount INT,
 	@activevlfcount INT,
-	@DBCCQuery varchar(1000),
+	@DBCCQuery nvarchar(1000), --Needs to be nvarchar for databases with specialty characters
 	@currentlogsizeMB INT
  
 CREATE TABLE #VLFSummary
@@ -96,10 +96,8 @@ BEGIN
  
 	WHILE (@@fetch_status <> -1)
 	BEGIN
-		SET @DBCCQuery = REPLACE(REPLACE(
-			'DBCC loginfo ("{{DatabaseName}}") WITH NO_INFOMSGS, TABLERESULTS'
-			,'"','''')
-			,'{{DatabaseName}}', @DBName)
+		-- removed " to [] better handle specialty character databases
+		SET @DBCCQuery = REPLACE('DBCC loginfo ([{{DatabaseName}}]) WITH NO_INFOMSGS, TABLERESULTS','{{DatabaseName}}', @DBName)
 
 		IF(@MajorVersion >= 11)
 		BEGIN
